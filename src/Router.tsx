@@ -7,7 +7,7 @@ export const Router = () => {
     <Routes>
       <Route path="/" element={ <Navigate to="/investors" /> } />
       <Route path='/investors' element={<Investors />} />
-      <Route path='/investor' element={<Investor />} />
+      <Route path='/investor/:id' element={<Investor />} />
     </Routes>
   );
 };

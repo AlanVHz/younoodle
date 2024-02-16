@@ -1,33 +1,30 @@
 import React, { useEffect, useState } from "react";
 import { fetchAndParseCSV } from "../utils/fetchAndParseCSV";
 import { useNavigate } from "react-router-dom";
-import { ApiClient } from "../api/ApiClient";
-
-interface InvestorMatch {
-  investor: string;
-  startup: string;
-  industry: string;
-}
+import { LocalStorageClient } from "../api/LocalStorageClient";
+import { Industry, InvestorProfile } from "../types/investors.interface";
 
 function Investors() {
-  const [matches, setMatches] = useState<InvestorMatch[]>([]);
-  const apiClient = new ApiClient();
+  const [matches, setMatches] = useState<InvestorProfile[]>([]);
+  const localStorageClient = new LocalStorageClient();
   const navigate = useNavigate();
 
   const makeMatches = (
     investorsCopy: string[][],
     startupDataCopy: string[][]
   ) => {
-    const matches: InvestorMatch[] = [];
+    const matches: InvestorProfile[] = [];
 
     for (const investor of investorsCopy) {
       let matchesCount = 0;
       for (const startup of startupDataCopy) {
         if (investor[1] === "any" || investor[1] === startup[1]) {
           matches.push({
-            investor: investor[0],
+            id: `${investor[0]}-${startup[0]}`,
+            name: investor[0],
+            industry: investor[1] as Industry,
             startup: startup[0],
-            industry: investor[1],
+            startupIndustry: startup[1] as Industry,
           });
           matchesCount++;
           if (matchesCount >= 10) {
@@ -38,11 +35,11 @@ function Investors() {
     }
 
     setMatches(matches);
-    apiClient.setItem("matchesObj", JSON.stringify(matches));
+    localStorageClient.setItem("investors", JSON.stringify(matches));
   };
 
   useEffect(() => {
-    const matchedData = apiClient.getItem("matchesObj");
+    const matchedData = localStorageClient.getItem("investors");
     const fetchCsvData = async () => {
       console.log("Fetching CSV data...");
       const investorsData = await fetchAndParseCSV("assets/csv/investors.csv");
@@ -53,13 +50,13 @@ function Investors() {
     matchedData ? setMatches(JSON.parse(matchedData)) : fetchCsvData();
   }, []);
 
-  const handleInvestorEvent = (item: InvestorMatch) => {
-    navigate("/investor");
+  const handleInvestorEvent = (item: InvestorProfile) => {
+    navigate("/investor/" + item.id);
     console.log("Investor clicked: ", item);
   };
 
   return (
-    <div className='container mx-auto px-4 py-4'>
+    <div className='container'>
       <p className='text-4xl my-4'>Our Investors</p>
       <ul className='grid grid-cols-3 auto-rows-auto gap-4'>
         {matches.map((item, index) => {
@@ -70,7 +67,7 @@ function Investors() {
               key={item.startup + index}
             >
               <p>
-                Investor: <b>{item.investor}</b>
+                Investor: <b>{item.name}</b>
               </p>
               <p>
                 Industry: <b>{item.startup}</b>
