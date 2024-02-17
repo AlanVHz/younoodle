@@ -2,41 +2,16 @@ import React, { useEffect, useState } from "react";
 import { fetchAndParseCSV } from "../utils/fetchAndParseCSV";
 import { useNavigate } from "react-router-dom";
 import { LocalStorageClient } from "../api/LocalStorageClient";
-import { Industry, InvestorProfile } from "../types/investors.interface";
+import {
+  Industry,
+  InvestorProfile,
+} from "../types/investors.interface";
+import { matchInvestorsWithStartups } from "../utils/investorsMatcher";
 
 function Investors() {
-  const [matches, setMatches] = useState<InvestorProfile[]>([]);
+  const [matches, setMatches] = useState<any>([]);
   const localStorageClient = new LocalStorageClient();
   const navigate = useNavigate();
-
-  const makeMatches = (
-    investorsCopy: string[][],
-    startupDataCopy: string[][]
-  ) => {
-    const matches: InvestorProfile[] = [];
-
-    for (const investor of investorsCopy) {
-      let matchesCount = 0;
-      for (const startup of startupDataCopy) {
-        if (investor[1] === "any" || investor[1] === startup[1]) {
-          matches.push({
-            id: `${investor[0]}-${startup[0]}`,
-            name: investor[0],
-            industry: investor[1] as Industry,
-            startup: startup[0],
-            startupIndustry: startup[1] as Industry,
-          });
-          matchesCount++;
-          if (matchesCount >= 10) {
-            break;
-          }
-        }
-      }
-    }
-
-    setMatches(matches);
-    localStorageClient.setItem("investors", JSON.stringify(matches));
-  };
 
   useEffect(() => {
     const matchedData = localStorageClient.getItem("investors");
@@ -44,7 +19,18 @@ function Investors() {
       console.log("Fetching CSV data...");
       const investorsData = await fetchAndParseCSV("assets/csv/investors.csv");
       const startupData = await fetchAndParseCSV("assets/csv/startups.csv");
-      makeMatches(investorsData, startupData);
+
+      const result = matchInvestorsWithStartups(investorsData, startupData);
+      localStorageClient.setItem(
+        localStorageClient.investorsWithStartups,
+        JSON.stringify(result)
+      );
+
+      setMatches(result)
+
+      // Temporary?
+      localStorageClient.setItem("investorsCsv", JSON.stringify(investorsData));
+      localStorageClient.setItem("startupCsv", JSON.stringify(startupData));
     };
 
     matchedData ? setMatches(JSON.parse(matchedData)) : fetchCsvData();
@@ -59,7 +45,7 @@ function Investors() {
     <div className='container'>
       <p className='text-4xl my-4'>Our Investors</p>
       <ul className='grid grid-cols-3 auto-rows-auto gap-4'>
-        {matches.map((item, index) => {
+        {/* {matches.map((item, index) => {
           return (
             <li
               onClick={() => handleInvestorEvent(item)}
@@ -74,7 +60,7 @@ function Investors() {
               </p>
             </li>
           );
-        })}
+        })} */}
 
         {/* {startupData.map((item) => {
             return (

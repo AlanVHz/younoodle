@@ -1,9 +1,8 @@
 export interface InvestorProfile {
-  id: string;
-  name: string;
-  industry: Industry;
-  startup: string;
-  startupIndustry: Industry;
+  id?: string;
+  name?: string;
+  industry?: Industry;
+  startups?: string[];
 }
 
 export enum Industry {
@@ -11,9 +10,4 @@ export enum Industry {
   BIO = "bio",
   INTERNET = "internet",
   ENVIRONMENT = "environment",
-}
-
-export interface CsvData {
-  name: string;
-  industry: Industry;
 }

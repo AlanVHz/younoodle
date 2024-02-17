@@ -1,24 +1,9 @@
-import React, { ChangeEvent, useEffect, useState } from "react";
-import { ApiClient } from "../api/ApiClient";
-import { Industry, InvestorProfile } from "../types/investors.interface";
-import { useParams } from "react-router-dom";
+import React, { ChangeEvent, useState } from "react";
+import { Industry } from "../types/investors.interface";
 
-function Investor() {
-  const apiClient = new ApiClient();
-  const [investor, setInvestor] = useState<InvestorProfile | undefined>();
-  const [investorName, setInvestorName] = useState("");
-  const [editionEnabled, setEditionEnabled] = useState<boolean>(false);
-  const params = useParams();
-
+function AddInvestor() {
   const industryValues = Object.values(Industry);
   const [investorData, setInvestorData] = useState({ name: "", industry: "any" })
-
-  useEffect(() => {
-    const data = apiClient.get(params.id ?? "") as InvestorProfile;
-    setInvestor(data);
-    //setInvestorName(data.name);
-  }, []);
-
 
   const handleInputChange = (e: ChangeEvent<any>) => {
     const { name, value } = e.target;
@@ -30,13 +15,8 @@ function Investor() {
     console.log(investorData)
   }
 
-  const handleInvestorNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setInvestorName(e.target.value)
-  }
-
   return (
-    <>
-      <form onSubmit={handleFormSubmit} className='w-full max-w-sm'>
+    <form onSubmit={handleFormSubmit} className='w-full max-w-sm'>
       <div className='md:flex md:items-center mb-6'>
         <div className='md:w-1/3'>
           <label
@@ -101,8 +81,7 @@ function Investor() {
         </div>
       </div>
     </form>
-    </>
   );
 }
 
-export default Investor;
+export default AddInvestor;

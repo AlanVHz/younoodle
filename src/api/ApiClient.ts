@@ -8,7 +8,7 @@ export class ApiClient {
 
   getAll(): InvestorProfile[] {
     const data = this.localStorageClient.getItem(
-      this.localStorageClient.investorsKey
+      this.localStorageClient.investorsWithStartups
     );
     return data ? JSON.parse(data) : [];
   }
@@ -17,7 +17,7 @@ export class ApiClient {
     let currentData = this.getAll();
     currentData.push(data);
     this.localStorageClient.setItem(
-      this.localStorageClient.investorsKey,
+      this.localStorageClient.investorsWithStartups,
       JSON.stringify(data)
     );
   }
