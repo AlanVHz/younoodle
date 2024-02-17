@@ -10,7 +10,7 @@ export const matchInvestorsWithStartups = (
 
     for (const investor of investors) {
         const [investorName, investorIndustry] = investor;
-        const matchedStartups: string[] = [];
+        const matchedStartups: string[][] = [];
 
         // Filter available startups based on investor's industry or 'any'
         const availableStartups: string[][] = startups.filter(([startupId, industry]) => {
@@ -21,10 +21,12 @@ export const matchInvestorsWithStartups = (
         const investorId: string = generateUUIDFromName(investorName);
 
         // Iterate through available startups and match them to the investor
-        for (const [startupId, _] of availableStartups) {
+        for (const startup of availableStartups) {
+            const [startupId, _] = startup
             if (matchedStartups.length >= 10) break; // Stop if investor has 10 matches
 
-            matchedStartups.push(startupId);
+            // Modification to add the entire startup and not just the name
+            matchedStartups.push(startup);
             usedStartupIds.add(startupId); // Add the startup to used startups
         }
 

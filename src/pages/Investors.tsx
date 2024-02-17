@@ -63,22 +63,14 @@ function Investors() {
               <div>
                 <p>Startups: </p>
                 <ul>
-                  { item.startups?.map((startup) => {
-                    return <li key={startup}><b>{startup}</b></li>
+                  { item.startups?.map((startup: string[]) => {
+                    return <li key={startup[0]}><b>{startup[0]} - {startup[1]}</b></li>
                   }) }
                 </ul>
               </div>
             </li>
           );
-        })} 
-
-        {/* {startupData.map((item) => {
-            return (
-              <li key={item[0]}>
-                Startup: {item[0]}, Industry: {item[1]}{" "}
-              </li>
-            );
-          })} */}
+        })}
       </ul>
     </div>
   );

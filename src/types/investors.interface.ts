@@ -2,7 +2,7 @@ export interface InvestorProfile {
   id?: string;
   name?: string;
   industry?: Industry;
-  startups?: string[];
+  startups?: string[][];
 }
 
 export enum Industry {
