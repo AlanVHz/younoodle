@@ -5,29 +5,32 @@ import { useParams } from "react-router-dom";
 
 function Investor() {
   const apiClient = new ApiClient();
-  const [investor, setInvestor] = useState<InvestorProfile | undefined>();
-  const [investorName, setInvestorName] = useState("");
-  const [editionEnabled, setEditionEnabled] = useState<boolean>(false);
-  const params = useParams();
 
+  // Source of truth
+  const [investor, setInvestor] = useState<InvestorProfile | undefined>();
+
+  // Name edition state
+  const [investorName, setInvestorName] = useState<string>("");
+
+  const params = useParams();
   const industryValues = Object.values(Industry);
-  const [investorData, setInvestorData] = useState({ name: "", industry: "any" })
 
   useEffect(() => {
     const data = apiClient.get(params.id ?? "") as InvestorProfile;
     setInvestor(data);
-    //setInvestorName(data.name);
+    setInvestorName(data.name || "");
+
+    console.log("Investor: ", data)
   }, []);
 
 
   const handleInputChange = (e: ChangeEvent<any>) => {
-    const { name, value } = e.target;
-    setInvestorData({ ...investorData, [name]: value });
+    // const { name, value } = e.target;
+    // setInvestorData({ ...investorData, [name]: value });
   }
 
   const handleFormSubmit = (e: any) => {
     e.preventDefault()
-    console.log(investorData)
   }
 
   const handleInvestorNameChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -51,7 +54,7 @@ function Investor() {
             className='bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500'
             id='inline-full-name'
             type='text'
-            value={investorData.name}
+            value={investorName}
             onChange={handleInputChange}
             name="name"
           />
@@ -70,7 +73,7 @@ function Investor() {
           <select
             className='block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500'
             id='grid-state'
-            value={investorData.industry}
+            value={investor?.industry}
             onChange={handleInputChange}
             name="industry"
           >

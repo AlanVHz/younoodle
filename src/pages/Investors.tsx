@@ -14,7 +14,8 @@ function Investors() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const matchedData = localStorageClient.getItem("investors");
+    const matchedData = localStorageClient.getItem(localStorageClient.investorsWithStartups);
+
     const fetchCsvData = async () => {
       console.log("Fetching CSV data...");
       const investorsData = await fetchAndParseCSV("assets/csv/investors.csv");
@@ -26,6 +27,7 @@ function Investors() {
         JSON.stringify(result)
       );
 
+      console.log("Result: ", result)
       setMatches(result)
 
       // Temporary?
@@ -42,25 +44,33 @@ function Investors() {
   };
 
   return (
-    <div className='container'>
+    <div className='container my-3'>
       <p className='text-4xl my-4'>Our Investors</p>
       <ul className='grid grid-cols-3 auto-rows-auto gap-4'>
-        {/* {matches.map((item, index) => {
+        { matches.map((item: InvestorProfile, index: number) => {
           return (
             <li
               onClick={() => handleInvestorEvent(item)}
               className='flex flex-col row-span-1 border cursor-pointer rounded border-gray-300 p-2'
-              key={item.startup + index}
+              key={item.id}
             >
               <p>
                 Investor: <b>{item.name}</b>
               </p>
               <p>
-                Industry: <b>{item.startup}</b>
+                Industry: <b>{item.industry}</b>
               </p>
+              <div>
+                <p>Startups: </p>
+                <ul>
+                  { item.startups?.map((startup) => {
+                    return <li key={startup}><b>{startup}</b></li>
+                  }) }
+                </ul>
+              </div>
             </li>
           );
-        })} */}
+        })} 
 
         {/* {startupData.map((item) => {
             return (
