@@ -1,13 +1,15 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { ApiClient } from "../api/ApiClient";
 import { Industry, InvestorProfile } from "../types/investors.interface";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { DeletedStartup, addDeletedStartupToStore } from "../utils/dataRemoved";
 
 function Investor() {
   const apiClient = new ApiClient();
+  const navigate = useNavigate();
 
   // Source of truth
-  const [investor, setInvestor] = useState<InvestorProfile>({ name: "" });
+  const [investor, setInvestor] = useState<InvestorProfile>({ name: "", startups: [] });
 
   const params = useParams();
   //const industryValues = Object.values(Industry);
@@ -35,8 +37,15 @@ function Investor() {
     setInvestor({ ...investor, name: e.target.value });
   };
 
-  const handleStartupDeletion = (index: number) => {
+  const handleStartupDeletion = (startup: string[], index: number) => {
     const newStartupsList = deleteStartupFromArray(index);
+    const deletedStartup: DeletedStartup = {
+      name: startup[0],
+      industry: startup[1] as Industry,
+      investorsName: investor.name,
+    };
+
+    addDeletedStartupToStore(deletedStartup);
     setInvestor({ ...investor, startups: newStartupsList });
   };
 
@@ -90,7 +99,7 @@ function Investor() {
                         <button
                           type='button'
                           onClick={() => {
-                            handleStartupDeletion(index);
+                            handleStartupDeletion(startup, index);
                           }}
                         >
                           Delete
@@ -102,9 +111,19 @@ function Investor() {
               </tbody>
             </table>
           </div>
-
           <div className='flex items-center justify-center'>
-            <div className='w-3/3 mt-5'>
+            {investor.startups!.length < 10 && (
+              <div className='w-3/3 mt-5 mx-2'>
+                <button
+                  onClick={() => (navigate("/addStartup"))}
+                  className='shadow bg-teal-500 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded'
+                  type='button'
+                >
+                  Add Startup
+                </button>
+              </div>
+            )}
+            <div className='w-3/3 mt-5 mx-2'>
               <button
                 className='shadow bg-teal-500 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded'
                 type='submit'
