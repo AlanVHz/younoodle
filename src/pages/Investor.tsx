@@ -2,14 +2,22 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 import { ApiClient } from "../api/ApiClient";
 import { Industry, InvestorProfile } from "../types/investors.interface";
 import { useNavigate, useParams } from "react-router-dom";
-import { DeletedStartup, addDeletedStartupToStore } from "../utils/dataRemoved";
+import {
+  DeletedStartup,
+  addDeletedStartupToStore,
+  addModifiedInvestorToStore,
+  getLatestInvestorDeletedStartups,
+} from "../utils/dataUpdate";
 
 function Investor() {
   const apiClient = new ApiClient();
   const navigate = useNavigate();
 
   // Source of truth
-  const [investor, setInvestor] = useState<InvestorProfile>({ name: "", startups: [] });
+  const [investor, setInvestor] = useState<InvestorProfile>({
+    name: "",
+    startups: [],
+  });
 
   const params = useParams();
   //const industryValues = Object.values(Industry);
@@ -27,12 +35,20 @@ function Investor() {
     return currentStartups;
   };
 
+  const addStartupToArray = (startup: string[]) => {
+    let currentStartups = [...investor.startups!];
+    currentStartups.push(startup)
+    return currentStartups;
+  }
+
   const handleFormSubmit = (e: any) => {
     e.preventDefault();
+
+    addModifiedInvestorToStore(investor);
+    //navigate("/investors")
     console.log("New Investor: ", investor);
   };
 
-  // ToDo: manage sessionstorage logic for deleted elements
   const handleInvestorNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setInvestor({ ...investor, name: e.target.value });
   };
@@ -47,6 +63,22 @@ function Investor() {
 
     addDeletedStartupToStore(deletedStartup);
     setInvestor({ ...investor, startups: newStartupsList });
+  };
+
+  const handleAddStartupEvent = () => {
+    let latestStartupOfCurrentInvestor: DeletedStartup = getLatestInvestorDeletedStartups(investor.name!);
+    let newStartupList: string[][] = [];
+
+    console.log("latestStartupOfCurrentInvestor: ", latestStartupOfCurrentInvestor)
+    if(latestStartupOfCurrentInvestor.name && latestStartupOfCurrentInvestor.industry) {
+      newStartupList = addStartupToArray([latestStartupOfCurrentInvestor.name, latestStartupOfCurrentInvestor.industry])
+    } else {
+      // ToDo: create new random startup feature
+      newStartupList = []
+    }
+
+    console.log("New Startups List: ", newStartupList)
+    setInvestor({ ...investor, startups: newStartupList });
   };
 
   return (
@@ -115,7 +147,7 @@ function Investor() {
             {investor.startups!.length < 10 && (
               <div className='w-3/3 mt-5 mx-2'>
                 <button
-                  onClick={() => (navigate("/addStartup"))}
+                  onClick={handleAddStartupEvent}
                   className='shadow bg-teal-500 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded'
                   type='button'
                 >

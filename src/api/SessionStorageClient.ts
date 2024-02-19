@@ -1,5 +1,6 @@
 export class SessionStorageClient {
     deletedStartups: string = "deletedStartups";
+    modifiedInvestors: string = "modifiedInvestors"
     
     constructor() {}
 
