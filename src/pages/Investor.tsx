@@ -66,6 +66,7 @@ function Investor() {
       name: startup[0],
       industry: startup[1] as Industry,
       investorsName: investor.name,
+      investorsId: investor.id,
     };
 
     addDeletedStartupToStore(deletedStartup);
@@ -73,7 +74,7 @@ function Investor() {
   };
 
   const handleAddStartupEvent = () => {
-    let latestStartupOfCurrentInvestor: DeletedStartup = getLatestInvestorDeletedStartups(investor.name!);
+    let latestStartupOfCurrentInvestor: DeletedStartup = getLatestInvestorDeletedStartups(investor.id!);
     let newStartupList: string[][] = [];
 
     console.log("latestStartupOfCurrentInvestor: ", latestStartupOfCurrentInvestor)

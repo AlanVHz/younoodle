@@ -6,6 +6,7 @@ export interface DeletedStartup {
   name?: string;
   industry?: Industry;
   investorsName?: string;
+  investorsId?: string;
 }
 
 const apiClient = new ApiClient();
@@ -20,14 +21,14 @@ const deleteStartupFromStore = (parsedData: any, startupName: string) => {
 
 // Block of code that can be optimized to re-used code to get sessionStorage values and parse them.
 export const getLatestInvestorDeletedStartups = (
-  investorsName: string
+  investorsId: string
 ): DeletedStartup => {
   let storageData: string | null = apiClient.getData(SessionStorageKeys.DELETED_STARTUPS)
   let parsedData: DeletedStartup[] = storageData ? JSON.parse(storageData) : [];
   let investorStartups: DeletedStartup[] = [];
 
   for (const startup of parsedData) {
-    if (startup.investorsName == investorsName) {
+    if (startup.investorsId == investorsId) {
       investorStartups.push(startup);
     }
   }
