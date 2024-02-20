@@ -147,6 +147,9 @@ function Investor() {
                 value={investorsName}
                 onChange={handleInvestorNameChange}
                 name='name'
+                aria-label="Investor's name"
+                aria-required="true"
+                aria-describedby="Investor's name"
               />
             </div>
           </div>
@@ -161,6 +164,9 @@ function Investor() {
                 </label>
                 <div>
                   <select
+                    aria-label="Investor's industry"
+                    aria-required="true"
+                    aria-describedby="Investor's industry"
                     id='industry'
                     name='industry'
                     value={investorsIndustry}
@@ -198,6 +204,7 @@ function Investor() {
                       <td className='py-2 px-4 text-sm'>{startup[1]}</td>
                       <td className='py-2 px-4 text-sm text-red-700 cursor-pointer'>
                         <button
+                          aria-label="Delete startup from the list"
                           type='button'
                           onClick={() => {
                             handleStartupDeletion(startup, index);
@@ -216,8 +223,9 @@ function Investor() {
             {investor.startups!.length < 10 && (
               <div className='w-3/3 mt-5 mx-2'>
                 <button
+                  aria-label="Add startup"
                   onClick={handleAddStartupEvent}
-                  className='shadow bg-teal-500 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded'
+                  className='shadow bg-teal-500 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded focus:bg-teal-800'
                   type='button'
                 >
                   Add Startup
@@ -226,7 +234,8 @@ function Investor() {
             )}
             <div className='w-3/3 mt-5 mx-2'>
               <button
-                className='shadow bg-teal-500 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded disabled:bg-gray-400'
+                aria-label="Save changes"
+                className='shadow bg-teal-500 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded disabled:bg-gray-400 focus:bg-teal-800'
                 type='submit'
                 disabled={isValidInvestor()}
               >
