@@ -1,5 +1,6 @@
-import { SessionStorageClient } from "../api/SessionStorageClient";
+import { ApiClient } from "../api/ApiClient";
 import { Industry, InvestorProfile } from "../types/investors.interface";
+import { SessionStorageKeys } from "../types/storage.interface";
 
 export interface DeletedStartup {
   name?: string;
@@ -7,27 +8,21 @@ export interface DeletedStartup {
   investorsName?: string;
 }
 
-const sessionStorageClient = new SessionStorageClient();
+const apiClient = new ApiClient();
 
 const deleteStartupFromStore = (parsedData: any, startupName: string) => {
   let elementIndex = parsedData.findIndex(
     (elem: DeletedStartup) => elem.name == startupName
   );
   elementIndex !== -1 && parsedData.splice(elementIndex, 1);
-
-  sessionStorageClient.setItem(
-    sessionStorageClient.deletedStartups,
-    JSON.stringify(parsedData)
-  );
+  apiClient.update(SessionStorageKeys.DELETED_STARTUPS, JSON.stringify(parsedData))
 };
 
 // Block of code that can be optimized to re-used code to get sessionStorage values and parse them.
 export const getLatestInvestorDeletedStartups = (
   investorsName: string
 ): DeletedStartup => {
-  let storageData: string | null = sessionStorageClient.getItem(
-    sessionStorageClient.deletedStartups
-  );
+  let storageData: string | null = apiClient.getData(SessionStorageKeys.DELETED_STARTUPS)
   let parsedData: DeletedStartup[] = storageData ? JSON.parse(storageData) : [];
   let investorStartups: DeletedStartup[] = [];
 
@@ -45,18 +40,13 @@ export const getLatestInvestorDeletedStartups = (
 };
 
 export const addModifiedInvestorToStore = (investor: InvestorProfile) => {
-  let storageData: string | null = sessionStorageClient.getItem(
-    sessionStorageClient.modifiedInvestors
-  );
+  let storageData: string | null = apiClient.getData(SessionStorageKeys.MODIFIED_INVESTORS)
   let parsedData: InvestorProfile[] = storageData
     ? JSON.parse(storageData)
     : [];
 
   parsedData.push(investor);
-  sessionStorageClient.setItem(
-    sessionStorageClient.modifiedInvestors,
-    JSON.stringify(parsedData)
-  );
+  apiClient.update(SessionStorageKeys.MODIFIED_INVESTORS, JSON.stringify(parsedData))
 
   return parsedData;
 };
@@ -64,16 +54,11 @@ export const addModifiedInvestorToStore = (investor: InvestorProfile) => {
 export const addDeletedStartupToStore = (
   startup: DeletedStartup
 ): DeletedStartup[] => {
-  let storageData: string | null = sessionStorageClient.getItem(
-    sessionStorageClient.deletedStartups
-  );
+  let storageData: string | null = apiClient.getData(SessionStorageKeys.DELETED_STARTUPS)
   let parsedData: DeletedStartup[] = storageData ? JSON.parse(storageData) : [];
 
   parsedData.push(startup);
-  sessionStorageClient.setItem(
-    sessionStorageClient.deletedStartups,
-    JSON.stringify(parsedData)
-  );
+  apiClient.update(SessionStorageKeys.DELETED_STARTUPS, JSON.stringify(parsedData))
 
   return parsedData;
 };

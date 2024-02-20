@@ -1,41 +1,39 @@
 import React, { useEffect, useState } from "react";
 import { fetchAndParseCSV } from "../utils/fetchAndParseCSV";
 import { useNavigate } from "react-router-dom";
-import { LocalStorageClient } from "../api/LocalStorageClient";
 import {
   Industry,
   InvestorProfile,
 } from "../types/investors.interface";
 import { matchInvestorsWithStartups } from "../utils/investorsMatcher";
+import { ApiClient } from "../api/ApiClient";
+import { LocalStorageKeys } from "../types/storage.interface";
 
 function Investors() {
   const [matches, setMatches] = useState<any>([]);
-  const localStorageClient = new LocalStorageClient();
   const navigate = useNavigate();
+  const apiClient = new ApiClient();
 
   useEffect(() => {
-    const matchedData = localStorageClient.getItem(localStorageClient.investorsWithStartups);
+    const matchedData = apiClient.getMatchedInvestorsStartupsData();
 
     const fetchCsvData = async () => {
-      console.log("Fetching CSV data...");
+      console.log("Fetching CSV data from files...");
       const investorsData = await fetchAndParseCSV("assets/csv/investors.csv");
       const startupData = await fetchAndParseCSV("assets/csv/startups.csv");
 
       const result = matchInvestorsWithStartups(investorsData, startupData);
-      localStorageClient.setItem(
-        localStorageClient.investorsWithStartups,
-        JSON.stringify(result)
-      );
 
-      console.log("Result: ", result)
+      apiClient.setMatchedInvestorsStartupsData(result)
+      apiClient.setData(LocalStorageKeys.INVESTORS, JSON.stringify(investorsData));
+      apiClient.setData(LocalStorageKeys.STARTUPS, JSON.stringify(startupData));
+
+      console.log("fetchCsvData result: ", result)
       setMatches(result)
-
-      // Temporary?
-      localStorageClient.setItem("investorsCsv", JSON.stringify(investorsData));
-      localStorageClient.setItem("startupCsv", JSON.stringify(startupData));
     };
 
-    matchedData ? setMatches(JSON.parse(matchedData)) : fetchCsvData();
+    console.log("matchedData: ", matchedData)
+    matchedData.length > 1 ? setMatches(matchedData) : fetchCsvData();
   }, []);
 
   const handleInvestorEvent = (item: InvestorProfile) => {

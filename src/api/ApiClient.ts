@@ -1,34 +1,77 @@
 import { InvestorProfile } from "../types/investors.interface";
+import {
+  CommonStorageKeys,
+} from "../types/storage.interface";
 import { LocalStorageClient } from "./LocalStorageClient";
+import { SessionStorageClient } from "./SessionStorageClient";
+
+/**
+ * Moved responsabilities from another clients to here so we have centralized storage logic,
+ * that will make easier the local/session storage manipulation to get and update data. 
+ * 
+ * I faced more complexity when i want to show a modified object instead of the original one, so 
+ * thats why I did the changes.
+ */
 
 export class ApiClient {
   localStorageClient = new LocalStorageClient();
+  sessionStorageClient = new SessionStorageClient();
+  isDataHasBeenModifiedKey: string = "isDataModifiedKey";
 
   constructor() {}
 
-  getAll(): InvestorProfile[] {
+  getMatchedInvestorsStartupsData(): InvestorProfile[] {
     const data = this.localStorageClient.getItem(
-      this.localStorageClient.investorsWithStartups
+      CommonStorageKeys.MATCHED_INVESTORS_STARTUPS
     );
     return data ? JSON.parse(data) : [];
   }
 
-  create(data: InvestorProfile) {
-    let currentData = this.getAll();
-    currentData.push(data);
+  setMatchedInvestorsStartupsData(data: InvestorProfile[]) {
     this.localStorageClient.setItem(
-      this.localStorageClient.investorsWithStartups,
+      CommonStorageKeys.MATCHED_INVESTORS_STARTUPS,
       JSON.stringify(data)
     );
   }
 
-  get(id: string) {
-    let currentData = this.getAll();
-    const index = currentData.findIndex(item => item.id === id);
-    return index !== -1 ? currentData[index] : {}
+  setData(key: string, body: string) {
+    this.isDataModified()
+      ? this.sessionStorageClient.setItem(key, body)
+      : this.localStorageClient.setItem(key, body);
   }
 
-  delete() {}
+  getInvestor(investorId?: string) {
+    let currentData = this.getMatchedInvestorsStartupsData();
+    const index = currentData.findIndex((item) => item.id === investorId);
+    return index !== -1 ? currentData[index] : {};
+  }
 
-  update() {}
+  getData(key: string): string | null {
+    return this.isDataModified()
+      ? this.sessionStorageClient.getItem(key)
+      : this.localStorageClient.getItem(key)
+  }
+
+  delete(key: string) {
+    this.isDataModified()
+      ? this.sessionStorageClient.removeItem(key)
+      : this.localStorageClient.removeItem(key);
+  }
+
+  update(key: string, body: string) {
+    this.setIsDataModified(true);
+    this.setData(key, body)
+  }
+
+  isDataModified = (): boolean => {
+    return sessionStorage.getItem(this.isDataHasBeenModifiedKey) === "true";
+  };
+
+  setIsDataModified = (value: boolean) => {
+    sessionStorage.setItem(
+      this.isDataHasBeenModifiedKey,
+      JSON.stringify(value)
+    );
+  };
 }
+

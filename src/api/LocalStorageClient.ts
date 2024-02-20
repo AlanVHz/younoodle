@@ -1,7 +1,4 @@
 export class LocalStorageClient {
-    investorsWithStartups = "investorsWithStartups"
-    investorsCsv = "investorsCsv"
-    startupCsv = "startupCsv"
 
     constructor() {}
 

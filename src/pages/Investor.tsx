@@ -23,7 +23,7 @@ function Investor() {
   //const industryValues = Object.values(Industry);
 
   useEffect(() => {
-    const data = apiClient.get(params.id ?? "") as InvestorProfile;
+    const data = apiClient.getInvestor(params.id ?? "") as InvestorProfile;
     setInvestor(data);
 
     console.log("Investor: ", data);
@@ -41,6 +41,7 @@ function Investor() {
     return currentStartups;
   }
 
+  // ToDo: Logic for modify the main match object before going into the investors list
   const handleFormSubmit = (e: any) => {
     e.preventDefault();
 
