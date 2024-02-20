@@ -157,7 +157,7 @@ function Investor() {
             {createMode ? (
               <div className='flex items-center justify-center md:w-3/3'>
                 <label
-                  htmlFor='country'
+                  htmlFor='industry'
                   className='text-gray-500 font-bold mb-1 pr-4'
                 >
                   Industry
@@ -199,7 +199,7 @@ function Investor() {
               <tbody>
                 {investor?.startups?.map((startup: string[], index) => {
                   return (
-                    <tr key={startup[0]}>
+                    <tr className="border-b" key={startup[0]}>
                       <td className='py-2 px-4 text-sm'>{startup[0]}</td>
                       <td className='py-2 px-4 text-sm'>{startup[1]}</td>
                       <td className='py-2 px-4 text-sm text-red-700 cursor-pointer'>
