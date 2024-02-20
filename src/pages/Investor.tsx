@@ -9,10 +9,13 @@ import {
   getLatestInvestorDeletedStartups,
   updateInvestorInMatchedObject,
 } from "../utils/dataUpdate";
+import { generateRandomStartup } from "../utils/startupGenerator";
+import { generateUUID } from "../utils/uuidGenerator";
 
 function Investor() {
   const apiClient = new ApiClient();
   const navigate = useNavigate();
+  const industryValues = Object.values(Industry);
 
   // Source of truth
   const [investor, setInvestor] = useState<InvestorProfile>({
@@ -20,13 +23,26 @@ function Investor() {
     startups: [],
   });
   // We create an investorsName state to not interfere with the "addStartup" feature
-  const [investorsName, setInvestorsName] = useState("")
+  const [investorsName, setInvestorsName] = useState("");
+  const [investorsIndustry, setInvestorsIndustry] = useState(Industry.Any);
+  const [createMode, setCreateMode] = useState(false);
   const params = useParams();
 
   useEffect(() => {
     const data = apiClient.getInvestor(params.id ?? "") as InvestorProfile;
-    setInvestor(data);
-    setInvestorsName(data.name ?? "default")
+
+    if (Object.keys(data).length === 0) {
+      setInvestor({
+        name: "Investor's name...",
+        startups: [],
+        industry: undefined,
+        id: generateUUID(),
+      });
+      setCreateMode(true);
+    } else {
+      setInvestor(data);
+      setInvestorsName(data.name ?? "default");
+    }
 
     console.log("Investor: ", data);
   }, []);
@@ -39,25 +55,28 @@ function Investor() {
 
   const addStartupToArray = (startup: string[]) => {
     let currentStartups = [...investor.startups!];
-    currentStartups.push(startup)
+    currentStartups.push(startup);
     return currentStartups;
-  }
+  };
 
   const handleFormSubmit = (e: any) => {
     e.preventDefault();
 
-    const payload = {...investor, name: investorsName}
+    let payload = { ...investor };
+    payload.name = investorsName;
+    payload.industry = investorsIndustry;
+
     const modifiedInvestorsList = addModifiedInvestorToStore(payload);
     console.log("New Investor: ", modifiedInvestorsList);
 
     const newMatchedObj = updateInvestorInMatchedObject(payload);
-    console.log("newMatchedObj: ", newMatchedObj);
+    console.log("New Matched Object: ", newMatchedObj);
 
-    navigate("/investors")
+    navigate("/investors");
   };
 
   const handleInvestorNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setInvestorsName(e.target.value)
+    setInvestorsName(e.target.value);
   };
 
   const handleStartupDeletion = (startup: string[], index: number) => {
@@ -74,20 +93,38 @@ function Investor() {
   };
 
   const handleAddStartupEvent = () => {
-    let latestStartupOfCurrentInvestor: DeletedStartup = getLatestInvestorDeletedStartups(investor.id!);
+    let latestStartupOfCurrentInvestor: DeletedStartup =
+      getLatestInvestorDeletedStartups(investor.id!);
     let newStartupList: string[][] = [];
 
-    console.log("latestStartupOfCurrentInvestor: ", latestStartupOfCurrentInvestor)
-    if(latestStartupOfCurrentInvestor.name && latestStartupOfCurrentInvestor.industry) {
-      newStartupList = addStartupToArray([latestStartupOfCurrentInvestor.name, latestStartupOfCurrentInvestor.industry])
+    console.log("Latest Startup: ", latestStartupOfCurrentInvestor);
+
+    if (
+      latestStartupOfCurrentInvestor.name &&
+      latestStartupOfCurrentInvestor.industry
+    ) {
+      newStartupList = addStartupToArray([
+        latestStartupOfCurrentInvestor.name,
+        latestStartupOfCurrentInvestor.industry,
+      ]);
     } else {
-      // ToDo: create new random startup feature
-      newStartupList = []
+      const randomStartup = generateRandomStartup(investorsIndustry);
+      newStartupList = addStartupToArray([randomStartup[0], randomStartup[1]]);
+      console.log("Random Startup: ", randomStartup);
     }
 
-    console.log("New Startups List: ", newStartupList)
+    console.log("New Startups List: ", newStartupList);
     setInvestor({ ...investor, startups: newStartupList });
   };
+
+  const isValidInvestor = (): boolean => {
+    return !(investorsName.length > 1 && (investor.startups!.length >= 1))
+  }
+
+  const handleIndustryChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setInvestor({...investor, startups: [] })
+    setInvestorsIndustry(e.target.value as Industry)
+  }
 
   return (
     <>
@@ -104,7 +141,7 @@ function Investor() {
             </div>
             <div className='md:w-2/3'>
               <input
-                className='bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500'
+                className='bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:teal-500'
                 id='inline-full-name'
                 type='text'
                 value={investorsName}
@@ -114,18 +151,42 @@ function Investor() {
             </div>
           </div>
           <div className='flex items-center justify-center mb-6'>
-            <div className='md:w-1/3'>
-              <p className='text-gray-500 font-bold'>
-                Industry: <b className='text-black'>{investor?.industry}</b>
-              </p>
-            </div>
+            {createMode ? (
+              <div className='flex items-center justify-center md:w-3/3'>
+                <label
+                  htmlFor='country'
+                  className='text-gray-500 font-bold mb-1 pr-4'
+                >
+                  Industry
+                </label>
+                <div>
+                  <select
+                    id='industry'
+                    name='industry'
+                    value={investorsIndustry}
+                    onChange={handleIndustryChange}
+                    className='py-2 px-4 bg-gray-200 border-2 border-gray-200 rounded w-full text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-teal-500'
+                  >
+                    {industryValues.map((industry) => {
+                      return <option key={industry}>{industry}</option>;
+                    })}
+                  </select>
+                </div>
+              </div>
+            ) : (
+              <div className='md:w-3/3'>
+                <p className='text-gray-500 font-bold'>
+                  Industry: <b className='text-black'>{investor?.industry}</b>
+                </p>
+              </div>
+            )}
           </div>
           <div className='flex justify-center'>
-            <table className='table-auto'>
+            <table className='block table-fixed min-h-96'>
               <thead>
                 <tr className='text-gray-500 font-bold'>
-                  <th>Startup</th>
-                  <th>Industry</th>
+                  <th className="w-20">Startup</th>
+                  <th className="w-20">Industry</th>
                   <th></th>
                 </tr>
               </thead>
@@ -165,8 +226,9 @@ function Investor() {
             )}
             <div className='w-3/3 mt-5 mx-2'>
               <button
-                className='shadow bg-teal-500 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded'
+                className='shadow bg-teal-500 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded disabled:bg-gray-400'
                 type='submit'
+                disabled={isValidInvestor()}
               >
                 Save
               </button>
