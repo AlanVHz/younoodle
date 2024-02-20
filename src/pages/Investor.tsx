@@ -7,6 +7,7 @@ import {
   addDeletedStartupToStore,
   addModifiedInvestorToStore,
   getLatestInvestorDeletedStartups,
+  updateInvestorInMatchedObject,
 } from "../utils/dataUpdate";
 
 function Investor() {
@@ -18,13 +19,14 @@ function Investor() {
     name: "",
     startups: [],
   });
-
+  // We create an investorsName state to not interfere with the "addStartup" feature
+  const [investorsName, setInvestorsName] = useState("")
   const params = useParams();
-  //const industryValues = Object.values(Industry);
 
   useEffect(() => {
     const data = apiClient.getInvestor(params.id ?? "") as InvestorProfile;
     setInvestor(data);
+    setInvestorsName(data.name ?? "default")
 
     console.log("Investor: ", data);
   }, []);
@@ -41,17 +43,21 @@ function Investor() {
     return currentStartups;
   }
 
-  // ToDo: Logic for modify the main match object before going into the investors list
   const handleFormSubmit = (e: any) => {
     e.preventDefault();
 
-    addModifiedInvestorToStore(investor);
-    //navigate("/investors")
-    console.log("New Investor: ", investor);
+    const payload = {...investor, name: investorsName}
+    const modifiedInvestorsList = addModifiedInvestorToStore(payload);
+    console.log("New Investor: ", modifiedInvestorsList);
+
+    const newMatchedObj = updateInvestorInMatchedObject(payload);
+    console.log("newMatchedObj: ", newMatchedObj);
+
+    navigate("/investors")
   };
 
   const handleInvestorNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setInvestor({ ...investor, name: e.target.value });
+    setInvestorsName(e.target.value)
   };
 
   const handleStartupDeletion = (startup: string[], index: number) => {
@@ -100,7 +106,7 @@ function Investor() {
                 className='bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500'
                 id='inline-full-name'
                 type='text'
-                value={investor.name}
+                value={investorsName}
                 onChange={handleInvestorNameChange}
                 name='name'
               />

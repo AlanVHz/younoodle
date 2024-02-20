@@ -1,6 +1,6 @@
 import { ApiClient } from "../api/ApiClient";
 import { Industry, InvestorProfile } from "../types/investors.interface";
-import { SessionStorageKeys } from "../types/storage.interface";
+import { CommonStorageKeys, SessionStorageKeys } from "../types/storage.interface";
 
 export interface DeletedStartup {
   name?: string;
@@ -39,7 +39,7 @@ export const getLatestInvestorDeletedStartups = (
   return latestDeletedStartup;
 };
 
-export const addModifiedInvestorToStore = (investor: InvestorProfile) => {
+export const addModifiedInvestorToStore = (investor: InvestorProfile): InvestorProfile[] => {
   let storageData: string | null = apiClient.getData(SessionStorageKeys.MODIFIED_INVESTORS)
   let parsedData: InvestorProfile[] = storageData
     ? JSON.parse(storageData)
@@ -62,3 +62,14 @@ export const addDeletedStartupToStore = (
 
   return parsedData;
 };
+
+export const updateInvestorInMatchedObject = (investor: InvestorProfile): InvestorProfile[] => {
+  let data = apiClient.getMatchedInvestorsStartupsData()
+  let index = data.findIndex((item) => item.id === investor.id)
+  index !== -1 && data.splice(index, 1);
+  data.push(investor)
+
+  apiClient.setData(CommonStorageKeys.MATCHED_INVESTORS_STARTUPS, JSON.stringify(data))
+
+  return data
+}
